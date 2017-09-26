@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Siwecos" default="dist">
+    <!-- ============================================  -->
+    <!-- Target: prepare                               -->
+    <!-- ============================================  -->
+    <target name="prepare">
+        <echo msg="Making directory ./build" />
+        <mkdir dir="./build" />
+
+        <echo msg="Making current timestamp" />
+        <tstamp>
+            <format property="zipstamp" pattern="%d%m%y%H%M%S" locale="de-DE" />
+        </tstamp>
+
+        <tstamp>
+            <format property="xmlstamp" pattern="%d.%m.%y" locale="de-DE" />
+        </tstamp>
+
+        <echo msg="fetching current versions" />
+        <xmlproperty file="./src/administrator/modules/mod_siwecos/mod_siwecos.xml" prefix="mod"/>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: build                                 -->
+    <!-- ============================================  -->
+    <target name="build" depends="prepare">
+        <echo msg="Deleting files from build directory" />
+        <delete dir="./build/mod" />
+
+        <echo msg="Copying files to build directory..." />
+
+        <echo msg="Copying module folder" />
+        <copy todir="./build/mod">
+            <fileset dir="./src/administrator/modules/mod_siwecos">
+            </fileset>
+            <filterchain>
+                <replacetokens begintoken="%%" endtoken="%%">
+                    <token key="CURRENTDATE" value="${xmlstamp}" />
+                    <token key="MODULEVERSION" value="${mod.extension.version}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- (DEFAULT)  Target: dist                       -->
+    <!-- ============================================  -->
+    <target name="dist" depends="build">
+        <echo msg="Creating module archive..." />
+
+        <zip destfile="./build/mod_siwecos_${mod.extension.version}_${zipstamp}.zip">
+            <fileset dir="./build/mod">
+                <include name="*" />
+                <include name="**/*" />
+            </fileset>
+        </zip>
+
+        <echo msg="Files copied and compressed in build directory OK!" />
+    </target>
+</project>
