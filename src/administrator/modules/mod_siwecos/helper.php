@@ -14,7 +14,7 @@
  */
 class ModSiwecosHelper
 {
-    const API_URL = "https://staging.siwecos.de/wp-json/siwecos/v1/";
+    const API_URL = "https://www.siwecos.de/wp-json/siwecos/v1/";
 
     /**
      * Try to login a user against the SIWECOS API
