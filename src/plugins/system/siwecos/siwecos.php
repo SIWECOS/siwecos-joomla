@@ -66,4 +66,95 @@ class PlgSystemSiwecos extends JPlugin
 
 		$table->params = json_encode($tmpparams);
 	}
+
+	/**
+	 * Content is passed by reference. Method is called after the content is saved.
+	 *
+	 * @param   string  $context  The context of the content passed to the plugin (added in 1.6).
+	 * @param   object  $table    A JTable object.
+	 * @param   bool    $isNew    If the content is just about to be created.
+	 * @param   array   $data     The posted data
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function onExtensionAfterSave($context, $table, $isNew, $data)
+	{
+		if ($context !== 'com_plugins.plugin' && $table->element === 'siwecos') {
+			return true;
+		}
+
+		$inputFilter = new \Joomla\Filter\InputFilter;
+
+		$tmpparams = json_decode($table->params);
+		$authtoken = $tmpparams->authtoken;
+
+		$headers = array(
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json;charset=UTF-8',
+			'userToken'    => $authtoken
+		);
+
+		$localDomain = (string)JUri::getInstance()->toString(['host']);
+		$http = JHttpFactory::getHttp();
+
+		$result = $http->post($this->apiUrl .'/domains/listDomains', null, $headers);
+
+		if ($result->code !== 200) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
+		}
+
+		$json = json_decode($result->body);
+
+		if ($json->hasFailed !== false) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $json->code);
+		}
+
+		foreach($json->domains as $domain) {
+			if (stripos($domain, '//'.$localDomain ) !== false) {
+				return true;
+			}
+		}
+
+		// Submit new Domain
+		$result = $http->post($this->apiUrl .'/domains/listDomains', null, $headers);
+
+		if ($result->code !== 200) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
+		}
+
+		$obj = new stdClass;
+		$obj->danger_level = 10;
+		$obj->domain = JUri::root();
+
+		$sendData = json_encode($obj);
+
+		$result = $http->post($this->apiUrl .'/domains/addNewDomain', $sendData, $headers);
+		if ($result->code !== 200) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
+		}
+
+		$json = json_decode($result->body);
+
+		if ($json->hasFailed !== false) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $json->code);
+		}
+
+		if ($json->verificationStatus === true) {
+			return true;
+		}
+
+		if (empty($json->domainToken)) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), 501);
+		}
+
+		$tmpparams->domainToken = $inputFilter->filter($json->domainToken, '', 'ALNUM');
+
+		$table->params = json_encode($tmpparams);
+
+		if (!$table->store()) {
+			throw new Exception(JText::_('JERROR_TABLE_STORE_ERROR'));
+		}
+
+	}
+
 }

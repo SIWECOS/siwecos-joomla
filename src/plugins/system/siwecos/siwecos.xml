@@ -20,22 +20,23 @@
                        type="text"
                        default=""
                        label="PLG_SYSTEM_SIWECOS_EMAIL_LABEL"
-                       description="PLG_SYSTEM_SIWECOS_EMAIL_DESC">
-                </field>
+                       description="PLG_SYSTEM_SIWECOS_EMAIL_DESC"/>
 
                 <field name="password"
                        type="text"
                        default=""
                        label="PLG_SYSTEM_SIWECOS_PASSWORD_LABEL"
-                       description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC">
-                </field>
+                       description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC"/>
 
                 <field name="authtoken"
                        type="text"
                        readonly="readonly"
                        label="PLG_SYSTEM_SIWECOS_AUTHTOKEN_LABEL"
-                       description="PLG_SYSTEM_SIWECOS_AUTHTOKEN_DESC">
-                </field>
+                       description="PLG_SYSTEM_SIWECOS_AUTHTOKEN_DESC"/>
+
+                <field name="domainToken"
+                       type="hidden"
+                />
             </fieldset>
         </fields>
     </config>
