@@ -157,4 +157,14 @@ class PlgSystemSiwecos extends JPlugin
 
 	}
 
+	/**
+	 * Add SIWECOS Meta tag
+	 */
+	public function onBeforeCompileHead() {
+		if (!empty($domainToken = $this->params->get('domainToken'))) {
+			$doc = JFactory::getDocument();
+			$doc->setMetaData('siwecostoken', $domainToken);
+		}
+	}
+
 }
