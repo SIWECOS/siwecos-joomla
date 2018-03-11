@@ -6,7 +6,7 @@
     <copyright>(C) 2018 CMS-Garden e.V. All rights reserved.</copyright>
     <authorEmail>info@siwecos.de</authorEmail>
     <authorUrl>siwecos.de</authorUrl>
-    <version>0.98.0</version>
+    <version>0.9.0</version>
     <description>PLG_SYSTEM_SIWECOS_DESC</description>
     <files folder="plugins/system/siwecos">
         <folder>language</folder>
@@ -28,14 +28,26 @@
                        label="PLG_SYSTEM_SIWECOS_PASSWORD_LABEL"
                        description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC"/>
 
-                <field name="authtoken"
+                <field name="dangerLevel"
+                       type="integer"
+                       first="1"
+                       last="10"
+                       step="1"
+                       default="10"
+                       label="PLG_SYSTEM_SIWECOS_DANGER_LEVEL_LABEL"
+                       description="PLG_SYSTEM_SIWECOS_DANGER_LEVEL_DESC"/>
+
+                <field name="authToken"
                        type="text"
                        readonly="readonly"
                        label="PLG_SYSTEM_SIWECOS_AUTHTOKEN_LABEL"
                        description="PLG_SYSTEM_SIWECOS_AUTHTOKEN_DESC"/>
 
                 <field name="domainToken"
-                       type="hidden"
+                       type="text"
+                       readonly="readonly"
+                       label="PLG_SYSTEM_SIWECOS_DOMAINTOKEN_LABEL"
+                       description="PLG_SYSTEM_SIWECOS_DOMAINTOKEN_DESC"
                 />
             </fieldset>
         </fields>

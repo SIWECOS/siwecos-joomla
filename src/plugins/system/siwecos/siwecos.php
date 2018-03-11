@@ -37,6 +37,10 @@ class PlgSystemSiwecos extends JPlugin
 		}
 
 		if (empty($data['params']['email']) || empty($data['params']['password'])) {
+			// We never save the password
+			$tmpparams = new JRegistry($table->params);
+			$tmpparams->set('password', '');
+			$table->params = json_encode($tmpparams);
 			return true;
 		}
 
@@ -59,11 +63,9 @@ class PlgSystemSiwecos extends JPlugin
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_AUTHTOKEN_EMPTY'), 500);
 		}
 
-		$tmpparams = json_decode($table->params);
-		$tmpparams->authtoken = $json->token;
-
-		unset($tmpparams->password);
-
+		$tmpparams = new JRegistry($table->params);
+		$tmpparams->set('authToken', $json->token);
+		$tmpparams->set('password', '');
 		$table->params = json_encode($tmpparams);
 	}
 
@@ -85,13 +87,13 @@ class PlgSystemSiwecos extends JPlugin
 
 		$inputFilter = new \Joomla\Filter\InputFilter;
 
-		$tmpparams = json_decode($table->params);
-		$authtoken = $tmpparams->authtoken;
+		$tmpparams = new JRegistry($table->params);
+		$authToken = $tmpparams->get('authToken');
 
 		$headers = array(
 			'Accept'       => 'application/json',
 			'Content-Type' => 'application/json;charset=UTF-8',
-			'userToken'    => $authtoken
+			'userToken'    => $authToken
 		);
 
 		$localDomain = JUri::root();
@@ -123,7 +125,7 @@ class PlgSystemSiwecos extends JPlugin
 
 		// Submit new Domain
 		$obj = new stdClass;
-		$obj->danger_level = 10;
+		$obj->danger_level = $tmpparams->get('dangerLevel', 10);
 		$obj->domain = $localDomain;
 
 		$sendData = json_encode($obj);
@@ -148,7 +150,7 @@ class PlgSystemSiwecos extends JPlugin
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_NO_DOMAIN_TOKEN'), 501);
 		}
 
-		$tmpparams->domainToken = $inputFilter->clean($json->domainToken, '', 'ALNUM');
+		$tmpparams->set('domainToken', $inputFilter->clean($json->domainToken, '', 'ALNUM'));
 
 		$table->params = json_encode($tmpparams);
 
@@ -175,16 +177,16 @@ class PlgSystemSiwecos extends JPlugin
 		if (empty($domainToken = $this->params->get('domainToken'))) {
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED2', 404);
 		}
-		if (empty($domainToken = $this->params->get('authtoken'))) {
+		if (empty($domainToken = $this->params->get('authToken'))) {
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED3', 405);
 		}
 
-		$authtoken = $this->params->get('authtoken');
+		$authToken = $this->params->get('authToken');
 
 		$headers = array(
 			'Accept'       => 'application/json',
 			'Content-Type' => 'application/json;charset=UTF-8',
-			'userToken'    => $authtoken
+			'userToken'    => $authToken
 		);
 
 		$localDomain = JUri::root();

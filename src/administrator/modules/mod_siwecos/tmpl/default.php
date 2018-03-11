@@ -10,18 +10,18 @@
 defined('_JEXEC') or die;
 
 JHtml::_('jquery.framework');
-
-$doc = JFactory::getDocument();
-$doc->addScript('../media/mod_siwecos/js/mod_siwecos.js');
-$doc->addScript('../media/mod_siwecos/js/jquery.AshAlom.gaugeMeter-2.0.0.min.js');
-$doc->addStyleSheet('../media/mod_siwecos/css/mod_siwecos.css');
+JHtml::_('script', 'mod_siwecos/mod_siwecos.js', array('relative' => true, 'version'=>1));
+JHtml::_('script', 'mod_siwecos/jquery.AshAlom.gaugeMeter-2.0.0.min.js', array('relative' => true));
+JHtml::_('stylesheet', 'mod_siwecos/mod_siwecos.css', array('relative' => true));
 
 JText::script('MOD_SIWECOS_RESULTS_DOMAIN_NOT_FOUND');
-?>
 
+?>
 <div class="mod_siwecos <?php echo $moduleclass_sfx ?>">
-    <?php if(!$pluginParams->get('authtoken')): ?>
+    <?php if(!$pluginParams->get('authToken')): ?>
         <div class="mod_siwecos_login">
+            <?php echo JText::_('MOD_SIWECOS_PLEASE_LOGIN'); ?><br/>
+            <a href="<?php echo JRoute::_('index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $plugin->id); ?>">Plugin</a>
         </div>
     <?php else: ?>
         <div class="mod_siwecos_resultbox">
@@ -36,7 +36,6 @@ JText::script('MOD_SIWECOS_RESULTS_DOMAIN_NOT_FOUND');
                     <div class="span8">
                         <strong class="text-center"><?php echo JText::_('MOD_SIWECOS_RESULTS_YOUR_SCANNERDETAILS'); ?></strong>
                         <div class="row-striped" id="mod_siwecos_scannerlist">
-
                         </div>
                     </div>
                 </div>
