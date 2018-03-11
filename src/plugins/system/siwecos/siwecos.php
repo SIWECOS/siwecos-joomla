@@ -30,9 +30,9 @@ class PlgSystemSiwecos extends JPlugin
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function onExtensionBeforeSave($context, $table, $isNew=false, $data=null)
+	public function onExtensionBeforeSave($context, $table, $isNew=false, $data=array())
 	{
-		if ($context !== 'com_plugins.plugin' && $table->element === 'siwecos') {
+		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos') {
 			return true;
 		}
 
@@ -79,16 +79,16 @@ class PlgSystemSiwecos extends JPlugin
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function onExtensionAfterSave($context, $table, $isNew, $data)
+	public function onExtensionAfterSave($context, $table, $isNew, $data=array())
 	{
-		if ($context !== 'com_plugins.plugin' && $table->element === 'siwecos') {
+		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos') {
 			return true;
 		}
 
 		$inputFilter = new \Joomla\Filter\InputFilter;
 
-		$tmpparams = new JRegistry($table->params);
-		$authToken = $tmpparams->get('authToken');
+		$this->params = new JRegistry($table->params);
+		$authToken = $this->params->get('authToken');
 
 		$headers = array(
 			'Accept'       => 'application/json',
@@ -118,14 +118,17 @@ class PlgSystemSiwecos extends JPlugin
 		}
 
 		foreach($json->domains as $domain) {
-			if ($domain === $localDomain) {
+			if ($domain->domain === $localDomain) {
+				if ($domain->verificationStatus !== true) {
+					$this->startVerification();
+				}
 				return true;
 			}
 		}
 
 		// Submit new Domain
 		$obj = new stdClass;
-		$obj->danger_level = $tmpparams->get('dangerLevel', 10);
+		$obj->danger_level = $this->params->get('dangerLevel', 10);
 		$obj->domain = $localDomain;
 
 		$sendData = json_encode($obj);
@@ -150,13 +153,17 @@ class PlgSystemSiwecos extends JPlugin
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_NO_DOMAIN_TOKEN'), 501);
 		}
 
-		$tmpparams->set('domainToken', $inputFilter->clean($json->domainToken, '', 'ALNUM'));
+		$this->params->set('domainToken', $inputFilter->clean($json->domainToken, '', 'ALNUM'));
 
-		$table->params = json_encode($tmpparams);
+		$table->params = json_encode($this->params);
 
 		if (!$table->store()) {
 			throw new Exception(JText::_('JERROR_TABLE_STORE_ERROR'));
 		}
+
+		$this->startVerification();
+
+		$this->startScan();
 
 	}
 
@@ -171,15 +178,43 @@ class PlgSystemSiwecos extends JPlugin
 	}
 
 	public function onAjaxSiwecos() {
+
 		if (!JFactory::getApplication()->isClient('administrator')) {
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED1', 403);
 		}
+
 		if (empty($domainToken = $this->params->get('domainToken'))) {
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED2', 404);
 		}
 		if (empty($domainToken = $this->params->get('authToken'))) {
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED3', 405);
 		}
+
+		$input = JFactory::getApplication()->input;
+		$method = $input->get('method', '', 'cmd');
+
+
+		switch ($method) {
+			case 'domainStatus':
+				$return = $this->getDomainStats();
+				break;
+			case 'domainScan':
+				$return = $this->startScan();
+				break;
+			default:
+				$return = false;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Request the stats for the domain
+	 *
+	 * @return array
+	 * @throws Exception
+	 */
+	public function getDomainStats() {
 
 		$authToken = $this->params->get('authToken');
 
@@ -215,8 +250,60 @@ class PlgSystemSiwecos extends JPlugin
 		);
 
 		return $return;
+	}
 
+	/**
+	 * Starts the scan for the current Domain
+	 */
+	public function startScan() {
 
+		$localDomain = JUri::root();
+		$localDomain = rtrim($localDomain,'/');
+
+		// Submit new Domain
+		$obj = new stdClass;
+		$obj->danger_level = $this->params->get('dangerLevel', 10);
+		$obj->domain = $localDomain;
+
+		$sendData = json_encode($obj);
+
+		$headers = array(
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json;charset=UTF-8',
+			'userToken'    => $this->params->get('authToken', 10)
+		);
+
+		$http = JHttpFactory::getHttp();
+
+		$result = $http->post($this->apiUrl .'/scan/start', $sendData, $headers);
+
+		return $result;
+	}
+
+	/**
+	 * Starts the scan for the current Domain
+	 */
+	public function startVerification() {
+
+		$localDomain = JUri::root();
+		$localDomain = rtrim($localDomain,'/');
+
+		// Submit new Domain
+		$obj = new stdClass;
+		$obj->danger_level = $this->params->get('dangerLevel', 10);
+		$obj->domain = $localDomain;
+
+		$sendData = json_encode($obj);
+
+		$headers = array(
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json;charset=UTF-8',
+			'userToken'    => $this->params->get('authToken', 10)
+		);
+
+		$http = JHttpFactory::getHttp();
+
+		$http->post($this->apiUrl .'/domains/verifyDomain', $sendData, $headers);
 	}
 
 }

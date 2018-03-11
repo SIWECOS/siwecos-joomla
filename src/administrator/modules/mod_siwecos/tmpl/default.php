@@ -10,11 +10,12 @@
 defined('_JEXEC') or die;
 
 JHtml::_('jquery.framework');
-JHtml::_('script', 'mod_siwecos/mod_siwecos.js', array('relative' => true, 'version'=>1));
+JHtml::_('script', 'mod_siwecos/mod_siwecos.js', array('relative' => true));
 JHtml::_('script', 'mod_siwecos/jquery.AshAlom.gaugeMeter-2.0.0.min.js', array('relative' => true));
 JHtml::_('stylesheet', 'mod_siwecos/mod_siwecos.css', array('relative' => true));
 
 JText::script('MOD_SIWECOS_RESULTS_DOMAIN_NOT_FOUND');
+JText::script('MOD_SIWECOS_SCAN_STARTED');
 
 ?>
 <div class="mod_siwecos <?php echo $moduleclass_sfx ?>">
@@ -37,6 +38,7 @@ JText::script('MOD_SIWECOS_RESULTS_DOMAIN_NOT_FOUND');
                         <strong class="text-center"><?php echo JText::_('MOD_SIWECOS_RESULTS_YOUR_SCANNERDETAILS'); ?></strong>
                         <div class="row-striped" id="mod_siwecos_scannerlist">
                         </div>
+                        <button id="siwecosStartScanBtn" class="btn-primary" style="margin-top: 10px"><?php echo JText::_('MOD_SIWECOS_BUTTON_RESCAN_LABEL'); ?></button>
                     </div>
                 </div>
             </div>

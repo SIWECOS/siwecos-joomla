@@ -103,3 +103,7 @@
     width: 140px;
     z-index: 3;
 }
+
+.mod_siwecos #siwecosStartScanBtn {
+    margin-top: 10px;
+}
