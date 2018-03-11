@@ -7,6 +7,8 @@
     <target name="prepare">
         <echo msg="Making directory ./build" />
         <mkdir dir="./build" />
+        <mkdir dir="./build/mod" />
+        <mkdir dir="./build/plg" />
 
         <echo msg="Making current timestamp" />
         <tstamp>
@@ -19,6 +21,8 @@
 
         <echo msg="fetching current versions" />
         <xmlproperty file="./src/administrator/modules/mod_siwecos/mod_siwecos.xml" prefix="mod"/>
+        <xmlproperty file="./src/plugins/system/siwecos/siwecos.xml" prefix="plg"/>
+        <xmlproperty file="./src/administrator/manifests/packages/pkg_siwecos.xml" prefix="pkg"/>
     </target>
 
     <!-- ============================================  -->
@@ -27,6 +31,8 @@
     <target name="build" depends="prepare">
         <echo msg="Deleting files from build directory" />
         <delete dir="./build/mod" />
+        <delete dir="./build/plg" />
+        <delete file="./build/pkg_siwecos.xml" />
 
         <echo msg="Copying files to build directory..." />
 
@@ -36,11 +42,42 @@
             </fileset>
             <filterchain>
                 <replacetokens begintoken="%%" endtoken="%%">
-                    <token key="CURRENTDATE" value="${xmlstamp}" />
                     <token key="MODULEVERSION" value="${mod.extension.version}" />
+                    <token key="CURRENTDATE" value="${xmlstamp}" />
                 </replacetokens>
             </filterchain>
         </copy>
+
+        <echo msg="Copying module media folder" />
+        <copy todir="./build/mod/media">
+            <fileset dir="./src/media/mod_siwecos">
+            </fileset>
+        </copy>
+
+        <echo msg="Copying plugin folder" />
+        <copy todir="./build/plg">
+            <fileset dir="./src/plugins/system/siwecos">
+            </fileset>
+            <filterchain>
+                <replacetokens begintoken="%%" endtoken="%%">
+                    <token key="PLUGINVERSION" value="${plg.extension.version}" />
+                    <token key="CURRENTDATE" value="${xmlstamp}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+
+        <echo msg="Copying package manifest" />
+        <copy tofile="./build/pkg_siwecos.xml" file="./src/administrator/manifests/packages/pkg_siwecos.xml">
+            <filterchain>
+                <replacetokens begintoken="%%" endtoken="%%">
+                    <token key="MOD_ZIPNAME" value="mod_siwecos_${mod.extension.version}_${zipstamp}.zip" />
+                    <token key="PLG_ZIPNAME" value="plg_siwecos_${plg.extension.version}_${zipstamp}.zip" />
+                    <token key="CURRENTDATE" value="${xmlstamp}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+
+        <copy tofile="./build/script.siwecos.php" file="./src/administrator/manifests/packages/script.siwecos.php" />
     </target>
 
     <!-- ============================================  -->
@@ -56,6 +93,25 @@
             </fileset>
         </zip>
 
+        <echo msg="Creating plugin archive..." />
+
+        <zip destfile="./build/plg_siwecos_${plg.extension.version}_${zipstamp}.zip">
+            <fileset dir="./build/plg">
+                <include name="*" />
+                <include name="**/*" />
+            </fileset>
+        </zip>
+
+        <echo msg="Creating package archive..." />
+
+        <zip destfile="./build/pkg_siwecos_${pkg.extension.version}_${zipstamp}.zip">
+            <fileset dir="./build">
+                <include name="mod_siwecos_${mod.extension.version}_${zipstamp}.zip" />
+                <include name="plg_siwecos_${plg.extension.version}_${zipstamp}.zip" />
+                <include name="pkg_siwecos.xml" />
+                <include name="script.siwecos.php" />
+            </fileset>
+        </zip>
         <echo msg="Files copied and compressed in build directory OK!" />
     </target>
 </project>

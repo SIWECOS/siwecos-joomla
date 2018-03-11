@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="package" version="3.8" method="upgrade" element="pkg_siwecos">
+  <name>SIWECOS Package</name>
+  <creationDate>%%CURRENTDATE%%</creationDate>
+  <author>SIWECOS</author>
+  <copyright>siwecos.de</copyright>
+  <license>GNU General Public License version 3 or later</license>
+  <authorEmail>info@siwecos.de</authorEmail>
+  <authorUrl>www.siwecos.de</authorUrl>
+  <version>1.0</version>
+  <packagename>siwecos</packagename>
+  <url>http://www.siwecos.de/</url>
+  <packager>SIWECOS</packager>
+  <packagerurl>http://www.siwecos.de</packagerurl>
+  <description>SIWECOS Package</description>
+
+  <files>
+    <file type="module" id="mod_siwecos" >%%MOD_ZIPNAME%%</file>
+    <file type="plugin" id="siwecos">%%PLG_ZIPNAME%%</file>
+  </files>
+
+  <scriptfile>script.siwecos.php</scriptfile>
+
+  <updateservers>
+    <server type="extension" priority="1" name="SIWECOS Update">https://updates.siwecos.de/joomla/updates.xml</server>
+  </updateservers>
+</extension>

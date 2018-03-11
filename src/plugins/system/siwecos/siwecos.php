@@ -1,9 +1,10 @@
 <?php
 /**
- * @package     SIWECOS.Plugin
- *
- * @copyright   Copyright (C) 2018 eco - Verband der Internetwirtschaft e.V., Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @version    %%PLUGINVERSION%%
+ * @package    PlgSiwecos
+ * @copyright  Copyright (C) 2017 CMS-Garden e.V.
+ * @license    GNU GPLv3 <http://www.gnu.org/licenses/gpl.html>
+ * @link       http://www.siwecos.de
  */
 
 defined('_JEXEC') or die;
@@ -27,20 +28,25 @@ class PlgSystemSiwecos extends JPlugin
 	 * @param   object  $table    A JTable object.
 	 * @param   bool    $isNew    If the content is just about to be created.
 	 * @param   array   $data     The posted data
-	 * @return bool
+	 *
+	 * @return boolean
+	 *
 	 * @throws Exception
 	 */
 	public function onExtensionBeforeSave($context, $table, $isNew=false, $data=array())
 	{
-		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos') {
+		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos')
+		{
 			return true;
 		}
 
-		if (empty($data['params']['email']) || empty($data['params']['password'])) {
+		if (empty($data['params']['email']) || empty($data['params']['password']))
+		{
 			// We never save the password
 			$tmpparams = new JRegistry($table->params);
 			$tmpparams->set('password', '');
 			$table->params = json_encode($tmpparams);
+
 			return true;
 		}
 
@@ -52,14 +58,21 @@ class PlgSystemSiwecos extends JPlugin
 
 		$send = json_encode($obj);
 
-		$result = $http->post($this->apiUrl .'/users/login', $send, array('Accept'=>'application/json', 'Content-Type' => 'application/json;charset=UTF-8'));
+		$result = $http->post(
+			$this->apiUrl . '/users/login',
+			$send,
+			array('Accept' => 'application/json', 'Content-Type' => 'application/json;charset=UTF-8')
+		);
 
-		if ($result->code !== 200) {
+		if ($result->code !== 200)
+		{
 			throw new Exception(JText::_('JGLOBAL_AUTH_INVALID_PASS'), $result->code);
 		}
 
 		$json = json_decode($result->body);
-		if (empty($json->token)) {
+
+		if (empty($json->token))
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_AUTHTOKEN_EMPTY'), 500);
 		}
 
@@ -76,12 +89,15 @@ class PlgSystemSiwecos extends JPlugin
 	 * @param   object  $table    A JTable object.
 	 * @param   bool    $isNew    If the content is just about to be created.
 	 * @param   array   $data     The posted data
-	 * @return bool
+	 *
+	 * @return boolean
+	 *
 	 * @throws Exception
 	 */
 	public function onExtensionAfterSave($context, $table, $isNew, $data=array())
 	{
-		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos') {
+		if ($context !== 'com_plugins.plugin' || $table->element !== 'siwecos')
+		{
 			return true;
 		}
 
@@ -97,31 +113,38 @@ class PlgSystemSiwecos extends JPlugin
 		);
 
 		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain,'/');
+		$localDomain = rtrim($localDomain, '/');
 
 		$http = JHttpFactory::getHttp();
 
-		$result = $http->post($this->apiUrl .'/domains/listDomains', null, $headers);
+		$result = $http->post($this->apiUrl . '/domains/listDomains', null, $headers);
 
-		if ($result->code !== 200) {
+		if ($result->code !== 200)
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR'), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
-		if (json_last_error() !== JSON_ERROR_NONE) {
+		if (json_last_error() !== JSON_ERROR_NONE)
+		{
 			throw new Exception(JText::sprintf('PLG_SYSTEM_SIWECOS_API_ERROR_INVALID_JSON', json_last_error_msg()), 500);
 		}
 
-		if ($json->hasFailed !== false) {
+		if ($json->hasFailed !== false)
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_FAILED'), $json->code);
 		}
 
-		foreach($json->domains as $domain) {
-			if ($domain->domain === $localDomain) {
-				if ($domain->verificationStatus !== true) {
+		foreach ($json->domains as $domain)
+		{
+			if ($domain->domain === $localDomain)
+			{
+				if ($domain->verificationStatus !== true)
+				{
 					$this->startVerification();
 				}
+
 				return true;
 			}
 		}
@@ -133,23 +156,27 @@ class PlgSystemSiwecos extends JPlugin
 
 		$sendData = json_encode($obj);
 
-		$result = $http->post($this->apiUrl .'/domains/addNewDomain', $sendData, $headers);
+		$result = $http->post($this->apiUrl . '/domains/addNewDomain', $sendData, $headers);
 
-		if ($result->code !== 200) {
+		if ($result->code !== 200)
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_ADD_NEW_DOMAIN'), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
-		if ($json->hasFailed !== false) {
+		if ($json->hasFailed !== false)
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_FAILED'), $json->code);
 		}
 
-		if ($json->verificationStatus === true) {
+		if ($json->verificationStatus === true)
+		{
 			return true;
 		}
 
-		if (empty($json->domainToken)) {
+		if (empty($json->domainToken))
+		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_NO_DOMAIN_TOKEN'), 501);
 		}
 
@@ -157,36 +184,51 @@ class PlgSystemSiwecos extends JPlugin
 
 		$table->params = json_encode($this->params);
 
-		if (!$table->store()) {
+		if (!$table->store())
+		{
 			throw new Exception(JText::_('JERROR_TABLE_STORE_ERROR'));
 		}
 
 		$this->startVerification();
 
 		$this->startScan();
-
 	}
 
 	/**
 	 * Add SIWECOS Meta tag
+	 *
+	 * @return void
 	 */
-	public function onBeforeCompileHead() {
-		if (!empty($domainToken = $this->params->get('domainToken'))) {
+	public function onBeforeCompileHead()
+	{
+		if (!empty($domainToken = $this->params->get('domainToken')))
+		{
 			$doc = JFactory::getDocument();
 			$doc->setMetaData('siwecostoken', $domainToken);
 		}
 	}
 
-	public function onAjaxSiwecos() {
-
-		if (!JFactory::getApplication()->isClient('administrator')) {
+	/**
+	 * Ajax call handler for module
+	 *
+	 * @return array|bool|\Joomla\CMS\Http\Response
+	 *
+	 * @throws Exception
+	 */
+	public function onAjaxSiwecos()
+	{
+		if (!JFactory::getApplication()->isClient('administrator'))
+		{
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED1', 403);
 		}
 
-		if (empty($domainToken = $this->params->get('domainToken'))) {
+		if (empty($domainToken = $this->params->get('domainToken')))
+		{
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED2', 404);
 		}
-		if (empty($domainToken = $this->params->get('authToken'))) {
+
+		if (empty($domainToken = $this->params->get('authToken')))
+		{
 			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED3', 405);
 		}
 
@@ -194,7 +236,8 @@ class PlgSystemSiwecos extends JPlugin
 		$method = $input->get('method', '', 'cmd');
 
 
-		switch ($method) {
+		switch ($method)
+		{
 			case 'domainStatus':
 				$return = $this->getDomainStats();
 				break;
@@ -214,8 +257,8 @@ class PlgSystemSiwecos extends JPlugin
 	 * @return array
 	 * @throws Exception
 	 */
-	public function getDomainStats() {
-
+	public function getDomainStats()
+	{
 		$authToken = $this->params->get('authToken');
 
 		$headers = array(
@@ -225,26 +268,29 @@ class PlgSystemSiwecos extends JPlugin
 		);
 
 		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain,'/');
-		$http = JHttpFactory::getHttp();
+		$localDomain = rtrim($localDomain, '/');
+		$http        = JHttpFactory::getHttp();
 
-		$result = $http->get($this->apiUrl .'/scan/result?domain=' . $localDomain, $headers);
+		$result = $http->get($this->apiUrl . '/scan/result?domain=' . $localDomain, $headers);
 
-		if ($result->code !== 200) {
+		if ($result->code !== 200)
+		{
 			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED4'), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
-		if (json_last_error() !== JSON_ERROR_NONE) {
+		if (json_last_error() !== JSON_ERROR_NONE)
+		{
 			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED5'), 500);
 		}
 
-		if ($json->hasFailed !== false) {
+		if ($json->hasFailed !== false)
+		{
 			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED6'), $json->code);
 		}
 
-		$date = JFactory::getDate(		$json->scanFinished->date, $json->scanFinished->timezone);
+		$date = JFactory::getDate($json->scanFinished->date, $json->scanFinished->timezone);
 		$json->scanFinished->localDate = $date->format(JText::_('DATE_FORMAT_LC5'));
 
 		$return = array(
@@ -257,11 +303,13 @@ class PlgSystemSiwecos extends JPlugin
 
 	/**
 	 * Starts the scan for the current Domain
+	 *
+	 * @return string call result
 	 */
-	public function startScan() {
-
+	public function startScan()
+	{
 		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain,'/');
+		$localDomain = rtrim($localDomain, '/');
 
 		// Submit new Domain
 		$obj = new stdClass;
@@ -278,18 +326,21 @@ class PlgSystemSiwecos extends JPlugin
 
 		$http = JHttpFactory::getHttp();
 
-		$result = $http->post($this->apiUrl .'/scan/start', $sendData, $headers);
+		$result = $http->post($this->apiUrl . '/scan/start', $sendData, $headers);
 
 		return $result;
 	}
 
 	/**
 	 * Starts the scan for the current Domain
+	 *
+	 * @return void
 	 */
-	public function startVerification() {
+	public function startVerification()
+	{
 
 		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain,'/');
+		$localDomain = rtrim($localDomain, '/');
 
 		// Submit new Domain
 		$obj = new stdClass;
@@ -306,7 +357,6 @@ class PlgSystemSiwecos extends JPlugin
 
 		$http = JHttpFactory::getHttp();
 
-		$http->post($this->apiUrl .'/domains/verifyDomain', $sendData, $headers);
+		$http->post($this->apiUrl . '/domains/verifyDomain', $sendData, $headers);
 	}
-
 }
