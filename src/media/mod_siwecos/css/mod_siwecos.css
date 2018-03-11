@@ -104,6 +104,6 @@
     z-index: 3;
 }
 
-.mod_siwecos #siwecosStartScanBtn {
+.mod_siwecos .btn {
     margin-top: 10px;
 }

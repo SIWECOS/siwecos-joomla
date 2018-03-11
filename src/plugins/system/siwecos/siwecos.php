@@ -244,6 +244,9 @@ class PlgSystemSiwecos extends JPlugin
 			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED6'), $json->code);
 		}
 
+		$date = JFactory::getDate(		$json->scanFinished->date, $json->scanFinished->timezone);
+		$json->scanFinished->localDate = $date->format(JText::_('DATE_FORMAT_LC5'));
+
 		$return = array(
 			'code' => 200,
 			'result' => $json
@@ -262,7 +265,7 @@ class PlgSystemSiwecos extends JPlugin
 
 		// Submit new Domain
 		$obj = new stdClass;
-		$obj->danger_level = $this->params->get('dangerLevel', 10);
+		$obj->dangerLevel = $this->params->get('dangerLevel', 10);
 		$obj->domain = $localDomain;
 
 		$sendData = json_encode($obj);

@@ -31,6 +31,7 @@ jQuery(document).ready(function () {
 
                     jQuery("#mod_siwecos_results .GaugeMeter").data('percent', parseInt(responseData.data[0].result.weightedMedia));
                     jQuery("#mod_siwecos_results .GaugeMeter").gaugeMeter();
+                    jQuery("#mod_siwecos_results #siwecosLastScan").html(responseData.data[0].result.scanFinished.localDate);
 
                 } else {
                     jQuery('#mod_siwecos_loadingtext').remove();
@@ -56,6 +57,4 @@ jQuery(document).ready(function () {
             }
         });
     });
-
-
 });
