@@ -145,6 +145,18 @@ class PlgSystemSiwecos extends JPlugin
 					$this->startVerification();
 				}
 
+				if ($this->params->get('domainToken', '') != $domain->domainToken)
+				{
+					$this->params->set('domainToken', $inputFilter->clean($domain->domainToken, '', 'ALNUM'));
+
+					$table->params = json_encode($this->params);
+
+					if (!$table->store())
+					{
+						throw new Exception(JText::_('JERROR_TABLE_STORE_ERROR'));
+					}
+				}
+
 				return true;
 			}
 		}

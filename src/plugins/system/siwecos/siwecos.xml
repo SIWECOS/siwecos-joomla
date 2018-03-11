@@ -23,7 +23,7 @@
                        description="PLG_SYSTEM_SIWECOS_EMAIL_DESC"/>
 
                 <field name="password"
-                       type="text"
+                       type="password"
                        default=""
                        label="PLG_SYSTEM_SIWECOS_PASSWORD_LABEL"
                        description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC"/>
