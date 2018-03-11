@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.8" client="administrator" method="upgrade">
+    <name>mod_siwecos</name>
+    <author>Harald Leithner | CMS-Garden e.V.</author>
+    <creationDate>2018-03-10</creationDate>
+    <copyright>Copyright (C) 2018 CMS-Garden e.V. All rights reserved.</copyright>
+    <license>GNU General Public License version 3 or later; see LICENSE.txt</license>
+    <authorEmail>info@siwecos.de</authorEmail>
+    <authorUrl>www.siwecos.de</authorUrl>
+    <version>0.9.0</version>
+    <description>MOD_SIWECOS_XML_DESCRIPTION</description>
+
+    <files>
+        <filename module="mod_siwecos">mod_siwecos.php</filename>
+        <folder>language</folder>
+        <folder>tmpl</folder>
+        <filename>helper.php</filename>
+    </files>
+
+    <media folder="media" destination="mod_siwecos">
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="authtoken"
+                    type="hidden" />
+            </fieldset>
+            <fieldset
+                name="advanced">
+                <field
+                    name="layout"
+                    type="modulelayout"
+                    label="JFIELD_ALT_LAYOUT_LABEL"
+                    description="JFIELD_ALT_MODULE_LAYOUT_DESC" />
+
+                <field
+                    name="moduleclass_sfx"
+                    type="textarea" rows="3"
+                    label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+                    description="COM_MODULES_FIELD_MODULECLASS_SFX_DESC" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

@@ -30,7 +30,7 @@ class PlgSystemSiwecos extends JPlugin
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function onExtensionBeforeSave($context, $table, $isNew, $data)
+	public function onExtensionBeforeSave($context, $table, $isNew=false, $data=null)
 	{
 		if ($context !== 'com_plugins.plugin' && $table->element === 'siwecos') {
 			return true;
@@ -94,49 +94,50 @@ class PlgSystemSiwecos extends JPlugin
 			'userToken'    => $authtoken
 		);
 
-		$localDomain = (string)JUri::getInstance()->toString(['host']);
+		$localDomain = JUri::root();
+		$localDomain = rtrim($localDomain,'/');
+
 		$http = JHttpFactory::getHttp();
 
 		$result = $http->post($this->apiUrl .'/domains/listDomains', null, $headers);
 
 		if ($result->code !== 200) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR'), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			throw new Exception(JText::sprintf('PLG_SYSTEM_SIWECOS_API_ERROR_INVALID_JSON', json_last_error_msg()), 500);
+		}
+
 		if ($json->hasFailed !== false) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $json->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_FAILED'), $json->code);
 		}
 
 		foreach($json->domains as $domain) {
-			if (stripos($domain, '//'.$localDomain ) !== false) {
+			if ($domain === $localDomain) {
 				return true;
 			}
 		}
 
 		// Submit new Domain
-		$result = $http->post($this->apiUrl .'/domains/listDomains', null, $headers);
-
-		if ($result->code !== 200) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
-		}
-
 		$obj = new stdClass;
 		$obj->danger_level = 10;
-		$obj->domain = JUri::root();
+		$obj->domain = $localDomain;
 
 		$sendData = json_encode($obj);
 
 		$result = $http->post($this->apiUrl .'/domains/addNewDomain', $sendData, $headers);
+
 		if ($result->code !== 200) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $result->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_ADD_NEW_DOMAIN'), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
 		if ($json->hasFailed !== false) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), $json->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_FAILED'), $json->code);
 		}
 
 		if ($json->verificationStatus === true) {
@@ -144,10 +145,10 @@ class PlgSystemSiwecos extends JPlugin
 		}
 
 		if (empty($json->domainToken)) {
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), 501);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_NO_DOMAIN_TOKEN'), 501);
 		}
 
-		$tmpparams->domainToken = $inputFilter->filter($json->domainToken, '', 'ALNUM');
+		$tmpparams->domainToken = $inputFilter->clean($json->domainToken, '', 'ALNUM');
 
 		$table->params = json_encode($tmpparams);
 
@@ -165,6 +166,55 @@ class PlgSystemSiwecos extends JPlugin
 			$doc = JFactory::getDocument();
 			$doc->setMetaData('siwecostoken', $domainToken);
 		}
+	}
+
+	public function onAjaxSiwecos() {
+		if (!JFactory::getApplication()->isClient('administrator')) {
+			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED1', 403);
+		}
+		if (empty($domainToken = $this->params->get('domainToken'))) {
+			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED2', 404);
+		}
+		if (empty($domainToken = $this->params->get('authtoken'))) {
+			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED3', 405);
+		}
+
+		$authtoken = $this->params->get('authtoken');
+
+		$headers = array(
+			'Accept'       => 'application/json',
+			'Content-Type' => 'application/json;charset=UTF-8',
+			'userToken'    => $authtoken
+		);
+
+		$localDomain = JUri::root();
+		$localDomain = rtrim($localDomain,'/');
+		$http = JHttpFactory::getHttp();
+
+		$result = $http->get($this->apiUrl .'/scan/result?domain=' . $localDomain, $headers);
+
+		if ($result->code !== 200) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED4'), $result->code);
+		}
+
+		$json = json_decode($result->body);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED5'), 500);
+		}
+
+		if ($json->hasFailed !== false) {
+			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED6'), $json->code);
+		}
+
+		$return = array(
+			'code' => 200,
+			'result' => $json
+		);
+
+		return $return;
+
+
 	}
 
 }

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.8" type="plugin" group="system" method="upgrade">
     <name>PLG_SYSTEM_SIWECOS_TITLE</name>
-    <author>Harald Leithner</author>
+    <author>Harald Leithner | CMS-Garden e.V.</author>
     <creationDate>2018-03-10</creationDate>
-    <copyright>(C) 2018 All rights reserved.</copyright>
+    <copyright>(C) 2018 CMS-Garden e.V. All rights reserved.</copyright>
     <authorEmail>info@siwecos.de</authorEmail>
     <authorUrl>siwecos.de</authorUrl>
-    <version>0.8.0</version>
+    <version>0.98.0</version>
     <description>PLG_SYSTEM_SIWECOS_DESC</description>
     <files folder="plugins/system/siwecos">
         <folder>language</folder>
