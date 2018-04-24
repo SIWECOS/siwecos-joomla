@@ -231,17 +231,17 @@ class PlgSystemSiwecos extends JPlugin
 	{
 		if (!JFactory::getApplication()->isClient('administrator'))
 		{
-			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED1', 403);
+			throw new Exception('PLG_SYSTEM_SIWECOS_ERROR_ONLY_IN_BACKEND', 403);
 		}
 
 		if (empty($domainToken = $this->params->get('domainToken')))
 		{
-			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED2', 404);
+			throw new Exception('PLG_SYSTEM_SIWECOS_ERROR_NO_DOMAIN_TOKEN', 404);
 		}
 
 		if (empty($domainToken = $this->params->get('authToken')))
 		{
-			throw new Exception('JERROR_AN_ERROR_HAS_OCCURRED3', 405);
+			throw new Exception('PLG_SYSTEM_SIWECOS_ERROR_NO_AUTH_TOKEN', 405);
 		}
 
 		$input = JFactory::getApplication()->input;
@@ -287,19 +287,19 @@ class PlgSystemSiwecos extends JPlugin
 
 		if ($result->code !== 200)
 		{
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED4'), $result->code);
+			throw new Exception(JText::sprintf('PLG_SYSTEM_SIWECOS_API_ERROR_CODE', $result->code), $result->code);
 		}
 
 		$json = json_decode($result->body);
 
 		if (json_last_error() !== JSON_ERROR_NONE)
 		{
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED5'), 500);
+			throw new Exception(JText::sprintf('PLG_SYSTEM_SIWECOS_API_ERROR_JSON_MSG', json_last_error_msg()), 500);
 		}
 
 		if ($json->hasFailed !== false)
 		{
-			throw new Exception(JText::_('JERROR_AN_ERROR_HAS_OCCURRED6'), $json->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_HAS_FAILED'), $json->code);
 		}
 
 		$date = JFactory::getDate($json->scanFinished->date, $json->scanFinished->timezone);
