@@ -6,7 +6,7 @@
     <copyright>(C) 2018 CMS-Garden e.V. All rights reserved.</copyright>
     <authorEmail>info@siwecos.de</authorEmail>
     <authorUrl>siwecos.de</authorUrl>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description>PLG_SYSTEM_SIWECOS_DESC</description>
     <files>
         <folder>language</folder>

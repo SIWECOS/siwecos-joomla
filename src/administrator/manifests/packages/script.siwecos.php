@@ -168,11 +168,37 @@ class Pkg_SiwecosInstallerScript
 		$query = $db->getQuery(true);
 		$query->update('#__modules')
 			->set('published = 1')
+			->set('access = 3')
 			->set('position = "cpanel"')
 			->set('ordering = 1')
 			->where($db->qn('module') . " = 'mod_siwecos'");
 
 		$db->setQuery($query)->execute();
+
+		// Add menu mapping if not present
+		$query = $db->getQuery(true);
+		$query->select('id')
+			->from('#__modules')
+			->where($db->qn('module') . " = 'mod_siwecos'");
+
+		$moduleId = $db->setQuery($query)->loadResult();
+
+		$query = $db->getQuery(true);
+		$query->select('menuid')
+			->from('#__modules_menu')
+			->where('moduleid = ' . (int) $moduleId);
+
+		$exists = $db->setQuery($query)->loadResult();
+
+		if ($exists !== null)
+		{
+			return true;
+		}
+
+		$query = $db->getQuery(true);
+		$query->insert('#__modules_menu')
+			->columns($db->quoteName(["moduleid", "menuid"]))
+			->values($moduleId . ", 0");
 
 		$db->setQuery($query)->execute();
 
