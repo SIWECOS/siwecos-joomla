@@ -19,7 +19,7 @@ class PlgSystemSiwecos extends JPlugin
 	/**
 	 * @var string The API url
 	 */
-	protected $apiUrl = 'https://bla.staging2.siwecos.de/api/v1';
+	protected $apiUrl = 'https://api.siwecos.de/bla/current/public/api/v1';
 
 	/**
 	 * Content is passed by reference. Method is called before the content is saved.
