@@ -3,6 +3,7 @@
     <name>PLG_SYSTEM_SIWECOS_TITLE</name>
     <author>Harald Leithner | CMS-Garden e.V.</author>
     <creationDate>%%CURRENTDATE%%</creationDate>
+    <license>GNU General Public License version 3 or later</license>
     <copyright>(C) 2018 CMS-Garden e.V. All rights reserved.</copyright>
     <authorEmail>info@siwecos.de</authorEmail>
     <authorUrl>siwecos.de</authorUrl>
