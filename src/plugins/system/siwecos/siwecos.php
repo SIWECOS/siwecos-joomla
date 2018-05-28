@@ -121,7 +121,7 @@ class PlgSystemSiwecos extends JPlugin
 
 		if ($result->code !== 200)
 		{
-			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR'), $result->code);
+			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_CODE'), $result->code);
 		}
 
 		$json = json_decode($result->body);
