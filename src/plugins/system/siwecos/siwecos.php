@@ -117,7 +117,7 @@ class PlgSystemSiwecos extends JPlugin
 
 		$http = JHttpFactory::getHttp();
 
-		$result = $http->post($this->apiUrl . '/domains/listDomains', null, $headers);
+		$result = $http->post($this->apiUrl . '/domains/listDomains', '', $headers);
 
 		if ($result->code !== 200)
 		{
