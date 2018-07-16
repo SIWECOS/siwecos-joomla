@@ -27,7 +27,8 @@
                        type="password"
                        default=""
                        label="PLG_SYSTEM_SIWECOS_PASSWORD_LABEL"
-                       description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC"/>
+                       description="PLG_SYSTEM_SIWECOS_PASSWORD_DESC"
+                       filter="raw"/>
 
                 <field name="dangerLevel"
                        type="integer"
@@ -48,8 +49,7 @@
                        type="text"
                        readonly="readonly"
                        label="PLG_SYSTEM_SIWECOS_DOMAINTOKEN_LABEL"
-                       description="PLG_SYSTEM_SIWECOS_DOMAINTOKEN_DESC"
-                />
+                       description="PLG_SYSTEM_SIWECOS_DOMAINTOKEN_DESC"/>
             </fieldset>
         </fields>
     </config>
