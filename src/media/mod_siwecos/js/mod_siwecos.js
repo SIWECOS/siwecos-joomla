@@ -35,7 +35,7 @@ jQuery(document).ready(function () {
 
                 } else {
                     jQuery('#mod_siwecos_loadingtext').remove();
-                    jQuery('#mod_siwecos_results').text(Joomla.JText._('MOD_SIWECOS_RESULTS_DOMAIN_NOT_FOUND'));
+                    jQuery('#mod_siwecos_results').text(Joomla.JText._(responseData.message));
                     jQuery('#mod_siwecos_results').show();
                 }
             },
