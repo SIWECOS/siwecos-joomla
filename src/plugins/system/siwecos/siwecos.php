@@ -229,6 +229,8 @@ class PlgSystemSiwecos extends JPlugin
 	 */
 	public function onAjaxSiwecos()
 	{
+        $this->loadLanguage();
+
 		if (!JFactory::getApplication()->isClient('administrator'))
 		{
 			throw new Exception('PLG_SYSTEM_SIWECOS_ERROR_ONLY_IN_BACKEND', 403);
@@ -246,7 +248,6 @@ class PlgSystemSiwecos extends JPlugin
 
 		$input = JFactory::getApplication()->input;
 		$method = $input->get('method', '', 'cmd');
-
 
 		switch ($method)
 		{
@@ -295,11 +296,6 @@ class PlgSystemSiwecos extends JPlugin
 		if (json_last_error() !== JSON_ERROR_NONE)
 		{
 			throw new Exception(JText::sprintf('PLG_SYSTEM_SIWECOS_API_ERROR_JSON_MSG', json_last_error_msg()), 500);
-		}
-
-		if ($json->hasFailed !== false)
-		{
-			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_HAS_FAILED'), $json->code);
 		}
 
 		$date = JFactory::getDate($json->scanFinished->date, $json->scanFinished->timezone);
