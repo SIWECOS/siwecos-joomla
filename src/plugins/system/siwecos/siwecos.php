@@ -138,7 +138,7 @@ class PlgSystemSiwecos extends JPlugin
 
 		foreach ($json->domains as $domain)
 		{
-			if ($domain->domain === $localDomain)
+			if (rtrim($domain->domain, "/") === rtrim($localDomain, "/"))
 			{
 				if ($domain->verificationStatus !== true)
 				{
