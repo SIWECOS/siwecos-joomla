@@ -12,6 +12,13 @@ defined('_JEXEC') or die;
 $moduleclass_sfx = htmlspecialchars($params->get('moduleclass_sfx'), ENT_COMPAT, 'UTF-8');
 
 $plugin = JPluginHelper::getPlugin('system', 'siwecos');
+
+// Check if plugin is installed and published
+if (!is_object($plugin))
+{
+  return; 
+}
+
 $pluginParams = new JRegistry($plugin->params);
 
 require JModuleHelper::getLayoutPath('mod_siwecos', $params->get('layout', 'default'));
