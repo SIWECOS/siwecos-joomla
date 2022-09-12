@@ -38,7 +38,7 @@ class Pkg_SiwecosInstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $maximumJoomlaVersion = '4.0.999';
+	protected $maximumJoomlaVersion = '4.9.999';
 
 	/**
 	 * =================================================================================================================

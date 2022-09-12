@@ -182,11 +182,6 @@ class PlgSystemSiwecos extends JPlugin
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_FAILED'), $json->code);
 		}
 
-		if ($json->verificationStatus === true)
-		{
-			return true;
-		}
-
 		if (empty($json->domainToken))
 		{
 			throw new Exception(JText::_('PLG_SYSTEM_SIWECOS_API_ERROR_NO_DOMAIN_TOKEN'), 501);
@@ -199,6 +194,11 @@ class PlgSystemSiwecos extends JPlugin
 		if (!$table->store())
 		{
 			throw new Exception(JText::_('JERROR_TABLE_STORE_ERROR'));
+		}
+
+		if ($json->verificationStatus === true)
+		{
+			return true;
 		}
 
 		$this->startVerification();
@@ -229,7 +229,7 @@ class PlgSystemSiwecos extends JPlugin
 	 */
 	public function onAjaxSiwecos()
 	{
-        $this->loadLanguage();
+		$this->loadLanguage();
 
 		if (!JFactory::getApplication()->isClient('administrator'))
 		{
@@ -280,11 +280,18 @@ class PlgSystemSiwecos extends JPlugin
 			'userToken'    => $authToken
 		);
 
-		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain, '/');
+		$localDomains = $this->getDomains();
 		$http        = JHttpFactory::getHttp();
 
-		$result = $http->get($this->apiUrl . '/scan/result?domain=' . $localDomain, $headers);
+		foreach ($localDomains as $localDomain)
+		{
+			$result = $http->get($this->apiUrl . '/scan/result?domain=' . $localDomain, $headers);
+
+			if ($result->code === 404)
+			{
+				continue;
+			}
+		}
 
 		if ($result->code !== 200)
 		{
@@ -316,10 +323,9 @@ class PlgSystemSiwecos extends JPlugin
 	 */
 	public function startScan()
 	{
-		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain, '/');
+		$localDomain = $this->getDomains()[0];
 
-		// Submit new Domain
+		// Submit new Scan
 		$obj = new stdClass;
 		$obj->dangerLevel = $this->params->get('dangerLevel', 10);
 		$obj->domain = $localDomain;
@@ -346,9 +352,7 @@ class PlgSystemSiwecos extends JPlugin
 	 */
 	public function startVerification()
 	{
-
-		$localDomain = JUri::root();
-		$localDomain = rtrim($localDomain, '/');
+		$localDomain = $this->getDomains()[0];
 
 		// Submit new Domain
 		$obj = new stdClass;
@@ -366,5 +370,24 @@ class PlgSystemSiwecos extends JPlugin
 		$http = JHttpFactory::getHttp();
 
 		$http->post($this->apiUrl . '/domains/verifyDomain', $sendData, $headers);
+	}
+
+	/**
+	 * Get domain array with primary and alternate
+	 *
+	 * @return array
+	 */
+	protected function getDomains()
+	{
+		$localDomain = JUri::root();
+		$localDomain = rtrim($localDomain, '/');
+
+		$alternateDomain = (stripos($localDomain, 'www.') !== false)
+			? str_ireplace("www.", "", $localDomain) : str_ireplace("://", "://www.", $localDomain);
+
+		return [
+			$localDomain,
+			$alternateDomain
+		];
 	}
 }
